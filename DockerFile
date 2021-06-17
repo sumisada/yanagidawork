@@ -1,0 +1,17 @@
+FROM alpine:3.4
+LABEL maintainer="yanagida"
+RUN apk update
+RUN apk add openrc
+RUN apk add nginx
+RUN apk add tcpdump
+RUN apk add curl
+RUN sed -i'.bak' 's/^#rc_sys=""/rc_sys="lxc"/' /etc/rc.conf
+RUN sed -i 's/^#rc_provide="!net"/rc_provide="loopback net"/' /etc/rc.conf
+RUN sed -i'.bak' '/getty/d' /etc/inittab
+RUN sed -i'.bak' 's/mount -t tmpfs/# mount -t tmpfs/' /lib/rc/sh/init.sh
+RUN sed -i'.bak' 's/hostname $opts/# hostname $opts/' /etc/init.d/hostname
+RUN sed -i'.bak' 's/cgroup_add_service$/# cgroup_add_service/' /lib/rc/sh/openrc-run.sh
+RUN mkdir /run/openrc
+RUN touch /run/openrc/softlevel
+RUN sed -i'.bak' 's/return 404;/root html;\n\t\tindex index.html;/' /etc/nginx/http.d/default.conf
+RUN rc-service nginx start
